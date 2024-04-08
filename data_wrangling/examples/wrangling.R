@@ -44,16 +44,27 @@ dat_sleep <- read_csv('../examples/mammal_sleep.csv')
 ## (1) Using the built-in cars dataset, convert the following statements to piped expressions: 
 
 # a. str(mtcars)
+mtcars |> 
+  str()
 
 # b. max(dim(subset(mtcars, cyl == 6)))
+mtcars |> 
+  subset(cyl == 6) |> 
+  dim() |> 
+  max()
 
 # c. nrow(filter(mtcars, cyl == 4))
+mtcars |> 
+  filter(cyl == 4) |> 
+  nrow()
 
 
 ## (2) Turning to the mammal sleep data, give the following a go:
 
 # a. Using pipes, filter the data to include animals with a body weight less 
 # than or equal to 500 kg. How many records remain?
+dat_sleep |> 
+  filter(body_wt <= 500)
 
 # b. Extend upon (1) to also remove the gestation variable, while keeping all others. 
 # How many variable are in the dataset?
@@ -61,6 +72,9 @@ dat_sleep <- read_csv('../examples/mammal_sleep.csv')
 # c. Starting fresh, filter the data to include only those animals with a brain 
 # weight between 10 and 50 g and which do not have any missing values (NAs) for life_span. 
 # There are multiple ways to achieve both, but have a look at the between() and drop_na() functions as a hint.
+dat_sleep |> 
+  filter(between(brain_wt, 10, 50)) |> 
+  drop_na()
 
 
 ## (3) In a single statement, create a new data.frame called mammal_subset from 
@@ -70,13 +84,23 @@ dat_sleep <- read_csv('../examples/mammal_sleep.csv')
 # - Excludes the predation, exposure, and danger variables
 # - Only includes records with gestation durations greater than 12.5 weeks d. 
 # - Contains records of body_wt in grams, and gestation in weeks
-
-
+mammal_subset <- 
+  dat_sleep |> 
+    drop_na() |> 
+    select(-predation, -exposure, -danger) |> 
+    mutate(gestation_weeks = gestation / 7,
+           body_wt_g = body_wt * 1000) |> 
+    filter(gestation_weeks > 12.5) 
+  
 ## (4) Using your new-found powers of summarisation, create piped commands to answer the following:
 
 # a. How many animals were categorised at each level of danger?
 
-# b. What are the average body and brain weights for each level of predation threat?
+# b. What are the average body and brain weights for each level of depredation threat?
+dat_sleep |> 
+  group_by(predation) |> 
+  summarise(avg_body_wt = mean(body_wt),
+            avg_brain_wt = mean(brain_wt))
 
 # c. What is the mean, minimum, and maximum proportion of time spent in ‘dreaming’ sleep
 
@@ -88,3 +112,6 @@ dat_sleep <- read_csv('../examples/mammal_sleep.csv')
 
 # f. What is the median and standard error lifespan in months for mammals that sleep less than 6 hours
 # per day? Hint: n() gives the current group size of the data, which you’ll need for calculating the standard error.
+
+
+
